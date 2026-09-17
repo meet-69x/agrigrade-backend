@@ -22,6 +22,7 @@ def process_batch(batch_id: uuid.UUID, db: Session) -> None:
         batch.status = BatchStatus.processing
         db.commit()
 
+        print(f"[BATCH PROCESSOR] Analyzing image for batch {batch.id}: {batch.image_path}")
         detections = segment_onions(batch.image_path)
         grades = []
 

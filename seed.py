@@ -10,30 +10,37 @@ from app.models.centre import Centre
 from app.models.user import User, UserRole
 from app.auth.security import hash_password
 
-Base.metadata.create_all(bind=engine)
-db = SessionLocal()
 
-centre = db.query(Centre).filter(Centre.name == "Nashik Procurement Centre").first()
-if not centre:
-    centre = Centre(name="Nashik Procurement Centre", location="Nashik, Maharashtra")
-    db.add(centre)
-    db.commit()
-    db.refresh(centre)
-    print(f"Created centre: {centre.id}")
+def seed_initial_data():
+    Base.metadata.create_all(bind=engine)
+    db = SessionLocal()
+    try:
+        centre = db.query(Centre).filter(Centre.name == "Nashik Procurement Centre").first()
+        if not centre:
+            centre = Centre(name="Nashik Procurement Centre", location="Nashik, Maharashtra")
+            db.add(centre)
+            db.commit()
+            db.refresh(centre)
+            print(f"Created initial centre: {centre.id}")
 
-admin = db.query(User).filter(User.email == "admin@agrigrade.ai").first()
-if not admin:
-    admin = User(
-        name="Admin User",
-        email="admin@agrigrade.ai",
-        password_hash=hash_password("admin123"),
-        role=UserRole.admin,
-        centre_id=centre.id,
-    )
-    db.add(admin)
-    db.commit()
-    print("Created admin user -> email: admin@agrigrade.ai / password: admin123")
-else:
-    print("Admin user already exists.")
+        admin = db.query(User).filter(User.email == "admin@agrigrade.ai").first()
+        if not admin:
+            admin = User(
+                name="Admin User",
+                email="admin@agrigrade.ai",
+                password_hash=hash_password("admin123"),
+                role=UserRole.admin,
+                centre_id=centre.id,
+            )
+            db.add(admin)
+            db.commit()
+            print("Created initial admin user -> email: admin@agrigrade.ai / password: admin123")
+    except Exception as e:
+        print(f"Seeding error: {e}")
+    finally:
+        db.close()
 
-db.close()
+
+if __name__ == "__main__":
+    seed_initial_data()
+

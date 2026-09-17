@@ -3,10 +3,9 @@ from datetime import datetime
 import enum
 
 from sqlalchemy import Column, String, DateTime, ForeignKey, Enum, Float, Integer
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from app.database import Base
+from app.database import Base, GUID
 
 
 class BatchStatus(str, enum.Enum):
@@ -19,12 +18,12 @@ class BatchStatus(str, enum.Enum):
 class Batch(Base):
     __tablename__ = "batches"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    centre_id = Column(UUID(as_uuid=True), ForeignKey("centres.id"), nullable=False)
-    operator_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    centre_id = Column(GUID(), ForeignKey("centres.id"), nullable=False)
+    operator_id = Column(GUID(), ForeignKey("users.id"), nullable=False)
     label = Column(String, nullable=True)  # e.g. user-given batch name/ID
     image_path = Column(String, nullable=True)
-    status = Column(Enum(BatchStatus), default=BatchStatus.pending, nullable=False)
+    status = Column(Enum(BatchStatus, native_enum=False), default=BatchStatus.pending, nullable=False)
 
     onion_count = Column(Integer, default=0)
     avg_size_mm = Column(Float, nullable=True)

@@ -1,9 +1,13 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
+from app.config import settings
 from app.database import Base, engine
 from app.models import user, centre, batch, onion  # noqa: F401 - registers models
 from app.routers import auth, batches, onions, centres
+from seed import seed_initial_data
 
 app = FastAPI(
     title="AgriGrade AI API",
@@ -19,12 +23,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+os.makedirs(settings.storage_dir, exist_ok=True)
+app.mount("/storage/images", StaticFiles(directory=settings.storage_dir), name="images")
+
 
 @app.on_event("startup")
 def on_startup():
-    # Creates tables if they don't exist. For production, switch to Alembic
-    # migrations instead of create_all.
     Base.metadata.create_all(bind=engine)
+    seed_initial_data()
 
 
 @app.get("/health")

@@ -84,8 +84,7 @@ def get_batch(batch_id: uuid.UUID, db: Session = Depends(get_db),
 
 
 @router.get("/{batch_id}/image")
-def get_batch_image(batch_id: uuid.UUID, db: Session = Depends(get_db),
-                     current_user: User = Depends(get_current_user)):
+def get_batch_image(batch_id: uuid.UUID, db: Session = Depends(get_db)):
     batch = db.query(Batch).filter(Batch.id == batch_id).first()
     if not batch or not batch.image_path:
         raise HTTPException(status_code=404, detail="Image not found")
